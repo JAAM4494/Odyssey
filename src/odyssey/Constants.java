@@ -42,6 +42,8 @@ public class Constants {
     
     public static String SQLSelectStatus = "select localUpdateAvaible from localUsers where userID=?";
     
+    public static String SQLSelectStatusToServer = "select localUpdateAvaibletoServer from localUsers where userID=?";
+    
     public static String SQLUpdateLocalLibStatus = "update localUsers set localUpdateAvaible=? where userID=?";
     
     public static String SQLUpdateLocalLibStatusToServer = "update localUsers set localUpdateAvaibletoServer=? where userID=?";

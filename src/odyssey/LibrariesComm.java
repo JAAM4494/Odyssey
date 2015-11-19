@@ -76,14 +76,19 @@ public class LibrariesComm {
         closeConnection(connection, myStmt);
     }
 
-    public boolean getLibrariesStatus() {
+    public boolean getLibrariesStatus(int pOption) {
         boolean returnVal = false;
 
         getConnection();
         PreparedStatement myStmt;
         ResultSet myRs = null;
-
-        String sql = Constants.SQLSelectStatus;
+        
+        String sql = "";
+        
+        if(pOption == 0) 
+            sql = Constants.SQLSelectStatus;
+        else
+            sql = Constants.SQLUpdateLocalLibStatusToServer;
 
         try {
             myStmt = connection.prepareStatement(sql);

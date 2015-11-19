@@ -15,8 +15,10 @@ public class CloudSyncThread extends Observable implements Runnable {
 
     public Thread newThread;
     private String threadName;
-    boolean suspended = false;
-    boolean stopThread = false;
+    private boolean suspended = false;
+    private boolean stopThread = false;
+    private boolean synchronizing = false;
+    private boolean trySuspend = false;
 
     public CloudSyncThread(String pName) {
         threadName = pName;
@@ -33,16 +35,18 @@ public class CloudSyncThread extends Observable implements Runnable {
 
                 //System.out.println("Thread: " + threadName + "running");
                 Thread.sleep(5000);
-                if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
-                    LibrariesComm communication = new LibrariesComm();
-                    boolean updateAvaible = communication.getLibrariesStatus();
+                LibrariesComm communication = new LibrariesComm();
+                boolean updateAvaible = communication.getLibrariesStatus(1);
 
-                    if (updateAvaible) {
-                        communication.setLocalLibStatus("0",0);
-                        setChanged();
-                        notifyObservers();
-                    }
+                if (updateAvaible) {
+                    runAux();
+                    //communication.setLocalLibStatus("0", 0);
+                    //setChanged();
+                    //notifyObservers();
                 }
+                
+                if(!synchronizing)
+                    suspended = true;
 
                 ////////////////////
                 Thread.sleep(300);
@@ -56,6 +60,16 @@ public class CloudSyncThread extends Observable implements Runnable {
             System.out.println("Thread " + threadName + " interrupted.");
         }
     }
+    
+    private void runAux() {
+        synchronizing = true;
+        
+        LibrariesComm communication = new LibrariesComm();
+        communication.syncMp3FilesWithCloud();
+        
+        communication.setLocalLibStatus("0", 1);
+        synchronizing = false;
+    }
 
     public void start() {
         if (newThread == null) {
@@ -64,48 +78,20 @@ public class CloudSyncThread extends Observable implements Runnable {
         }
     }
 
-    void suspend() {
+    public void suspend() {
         System.out.println("Pause...");
-        suspended = true;
+        //suspended = true;
+        trySuspend = true;
     }
 
-    synchronized void resume() {
+    public synchronized void resume() {
         System.out.println("Resuming...");
         suspended = false;
+        trySuspend = false;
         notify();
     }
 
     public void stop() {
         stopThread = true;
     }
-    
-    
-    /*
-    public static void main(String args[]) {
-
-        SyncThread R1 = new SyncThread("Hilo1");
-        R1.start();
-
-        try {
-            Thread.sleep(5000);
-            R1.suspend();
-            Thread.sleep(5000);
-            R1.resume();
-            Thread.sleep(5000);
-            R1.stop();
-        } catch (InterruptedException e) {
-            System.out.println("Main thread Interrupted");
-        }
-
-        /*
-         try {
-         System.out.println("Waiting for threads to finish.");
-         R1.newThread.join();
-         } catch (InterruptedException e) {
-         System.out.println("Main thread Interrupted");
-         }
-    }
-    */
-
 }
-

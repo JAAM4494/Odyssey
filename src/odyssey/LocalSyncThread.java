@@ -35,7 +35,7 @@ public class LocalSyncThread extends Observable implements Runnable {
                 Thread.sleep(5000);
                 if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
                     LibrariesComm communication = new LibrariesComm();
-                    boolean updateAvaible = communication.getLibrariesStatus();
+                    boolean updateAvaible = communication.getLibrariesStatus(0);
 
                     if (updateAvaible) {
                         communication.setLocalLibStatus("0",0);
@@ -64,12 +64,12 @@ public class LocalSyncThread extends Observable implements Runnable {
         }
     }
 
-    void suspend() {
+    public void suspend() {
         System.out.println("Pause...");
         suspended = true;
     }
 
-    synchronized void resume() {
+    public synchronized void resume() {
         System.out.println("Resuming...");
         suspended = false;
         notify();
