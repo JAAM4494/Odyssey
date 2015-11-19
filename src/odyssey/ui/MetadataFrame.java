@@ -39,6 +39,12 @@ public class MetadataFrame extends JDialog {
         this.actualGenreTV.setText(fileToUpdate.getGenre());
         this.actualYearTV.setText(fileToUpdate.getAnno());
         
+        this.backNameTV.setText(fileToUpdate.getNameBackup());
+        this.backArtistTV.setText(fileToUpdate.getArtistBackup());
+        this.backAlbumTV.setText(fileToUpdate.getAlbumBackup());
+        this.backGenreTV.setText(fileToUpdate.getGenreBackup());
+        this.backYearTV.setText(fileToUpdate.getAnnoBackup());
+        
         this.setVisible(true);
     }
     
@@ -59,6 +65,11 @@ public class MetadataFrame extends JDialog {
         LibrariesComm communication = new LibrariesComm();
         communication.updateMp3File(fileToUpdate);
     }
+    
+    private void restoreMetadata() {
+        LibrariesComm communication = new LibrariesComm();
+        communication.restoreMetaData(fileToUpdate);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -70,7 +81,7 @@ public class MetadataFrame extends JDialog {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        modifyMetaBtn = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -89,21 +100,29 @@ public class MetadataFrame extends JDialog {
         newAlbumTV = new javax.swing.JTextField();
         newGenreTV = new javax.swing.JTextField();
         newYearTV = new javax.swing.JTextField();
+        restoreMetaBtn = new javax.swing.JButton();
+        jLabel9 = new javax.swing.JLabel();
+        backNameTV = new javax.swing.JTextField();
+        backArtistTV = new javax.swing.JTextField();
+        backAlbumTV = new javax.swing.JTextField();
+        backGenreTV = new javax.swing.JTextField();
+        backYearTV = new javax.swing.JTextField();
+        jSeparator2 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
 
         jPanel1.setLayout(null);
 
-        jButton1.setBackground(java.awt.Color.green);
-        jButton1.setFont(new java.awt.Font("Ubuntu", 3, 15)); // NOI18N
-        jButton1.setForeground(java.awt.Color.white);
-        jButton1.setText("Modify");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        modifyMetaBtn.setBackground(java.awt.Color.green);
+        modifyMetaBtn.setFont(new java.awt.Font("Ubuntu", 3, 15)); // NOI18N
+        modifyMetaBtn.setForeground(java.awt.Color.white);
+        modifyMetaBtn.setText("Modify");
+        modifyMetaBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                modifyMetaBtnActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton1);
-        jButton1.setBounds(450, 290, 110, 30);
+        jPanel1.add(modifyMetaBtn);
+        modifyMetaBtn.setBounds(600, 280, 110, 30);
 
         jLabel2.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         jLabel2.setForeground(java.awt.Color.white);
@@ -115,7 +134,7 @@ public class MetadataFrame extends JDialog {
         jLabel3.setForeground(java.awt.Color.white);
         jLabel3.setText("New Metadata Version");
         jPanel1.add(jLabel3);
-        jLabel3.setBounds(330, 10, 210, 21);
+        jLabel3.setBounds(560, 10, 210, 21);
 
         jLabel4.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel4.setForeground(java.awt.Color.white);
@@ -149,47 +168,89 @@ public class MetadataFrame extends JDialog {
 
         actualYearTV.setEditable(false);
         jPanel1.add(actualYearTV);
-        actualYearTV.setBounds(100, 220, 170, 27);
+        actualYearTV.setBounds(100, 220, 150, 27);
 
         actualGenreTV.setEditable(false);
         jPanel1.add(actualGenreTV);
-        actualGenreTV.setBounds(100, 180, 170, 27);
+        actualGenreTV.setBounds(100, 180, 150, 27);
 
         actualAlbumTV.setEditable(false);
         jPanel1.add(actualAlbumTV);
-        actualAlbumTV.setBounds(100, 140, 170, 27);
+        actualAlbumTV.setBounds(100, 140, 150, 27);
 
         actualArtistTV.setEditable(false);
         jPanel1.add(actualArtistTV);
-        actualArtistTV.setBounds(100, 100, 170, 27);
+        actualArtistTV.setBounds(100, 100, 150, 27);
 
         actualNameTV.setEditable(false);
         jPanel1.add(actualNameTV);
-        actualNameTV.setBounds(100, 60, 170, 27);
+        actualNameTV.setBounds(100, 60, 150, 27);
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
         jPanel1.add(jSeparator1);
-        jSeparator1.setBounds(290, 40, 10, 230);
+        jSeparator1.setBounds(280, 40, 10, 230);
         jPanel1.add(newNameTV);
-        newNameTV.setBounds(340, 60, 170, 27);
+        newNameTV.setBounds(580, 60, 150, 27);
         jPanel1.add(newArtistTV);
-        newArtistTV.setBounds(340, 100, 170, 27);
+        newArtistTV.setBounds(580, 100, 150, 27);
         jPanel1.add(newAlbumTV);
-        newAlbumTV.setBounds(340, 140, 170, 27);
+        newAlbumTV.setBounds(580, 140, 150, 27);
         jPanel1.add(newGenreTV);
-        newGenreTV.setBounds(340, 180, 170, 27);
+        newGenreTV.setBounds(580, 180, 150, 27);
         jPanel1.add(newYearTV);
-        newYearTV.setBounds(340, 220, 170, 27);
+        newYearTV.setBounds(580, 220, 150, 27);
+
+        restoreMetaBtn.setBackground(java.awt.Color.blue);
+        restoreMetaBtn.setFont(new java.awt.Font("Ubuntu", 3, 15)); // NOI18N
+        restoreMetaBtn.setForeground(java.awt.Color.white);
+        restoreMetaBtn.setText("Restore Metadata");
+        restoreMetaBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                restoreMetaBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(restoreMetaBtn);
+        restoreMetaBtn.setBounds(310, 280, 190, 30);
+
+        jLabel9.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        jLabel9.setForeground(java.awt.Color.white);
+        jLabel9.setText("Backup Metadata Version");
+        jPanel1.add(jLabel9);
+        jLabel9.setBounds(295, 10, 230, 21);
+
+        backNameTV.setEditable(false);
+        jPanel1.add(backNameTV);
+        backNameTV.setBounds(330, 60, 150, 27);
+
+        backArtistTV.setEditable(false);
+        jPanel1.add(backArtistTV);
+        backArtistTV.setBounds(330, 100, 150, 27);
+
+        backAlbumTV.setEditable(false);
+        jPanel1.add(backAlbumTV);
+        backAlbumTV.setBounds(330, 140, 150, 27);
+
+        backGenreTV.setEditable(false);
+        jPanel1.add(backGenreTV);
+        backGenreTV.setBounds(330, 180, 150, 27);
+
+        backYearTV.setEditable(false);
+        jPanel1.add(backYearTV);
+        backYearTV.setBounds(330, 220, 150, 27);
+
+        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        jPanel1.add(jSeparator2);
+        jSeparator2.setBounds(535, 40, 10, 230);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bg2.jpg"))); // NOI18N
         jPanel1.add(jLabel1);
-        jLabel1.setBounds(0, 0, 570, 330);
+        jLabel1.setBounds(0, 0, 800, 330);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -199,10 +260,15 @@ public class MetadataFrame extends JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void modifyMetaBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifyMetaBtnActionPerformed
         // actualizar metadata en la base de datos ya sea local o en cloud
         updateMetadata();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_modifyMetaBtnActionPerformed
+
+    private void restoreMetaBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restoreMetaBtnActionPerformed
+        // TODO add your handling code here:
+        restoreMetadata();
+    }//GEN-LAST:event_restoreMetaBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField actualAlbumTV;
@@ -210,7 +276,11 @@ public class MetadataFrame extends JDialog {
     private javax.swing.JTextField actualGenreTV;
     private javax.swing.JTextField actualNameTV;
     private javax.swing.JTextField actualYearTV;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JTextField backAlbumTV;
+    private javax.swing.JTextField backArtistTV;
+    private javax.swing.JTextField backGenreTV;
+    private javax.swing.JTextField backNameTV;
+    private javax.swing.JTextField backYearTV;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -219,12 +289,16 @@ public class MetadataFrame extends JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JButton modifyMetaBtn;
     private javax.swing.JTextField newAlbumTV;
     private javax.swing.JTextField newArtistTV;
     private javax.swing.JTextField newGenreTV;
     private javax.swing.JTextField newNameTV;
     private javax.swing.JTextField newYearTV;
+    private javax.swing.JButton restoreMetaBtn;
     // End of variables declaration//GEN-END:variables
 }

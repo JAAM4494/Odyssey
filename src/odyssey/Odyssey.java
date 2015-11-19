@@ -32,10 +32,10 @@ public class Odyssey {
             System.out.println(e.toString());
         }
 
-        LoginFrame ventanaLogin = new LoginFrame();
-        ventanaLogin.setVisible(true);
+        //LoginFrame ventanaLogin = new LoginFrame();
+        //ventanaLogin.setVisible(true);
         
-        //OdysseyFrame ventanaOdyssey = new OdysseyFrame();
-        //ventanaOdyssey.run();
+        OdysseyFrame ventanaOdyssey = new OdysseyFrame();
+        ventanaOdyssey.run();
     }
 }

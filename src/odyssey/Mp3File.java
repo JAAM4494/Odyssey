@@ -20,6 +20,12 @@ public class Mp3File {
     private int Duration;
     private int LengthBytes;
     
+    private String NameBackup;
+    private String ArtistBackup;
+    private String AlbumBackup;
+    private String GenreBackup;
+    private String AnnoBackup;
+    
     public Mp3File() {
         Name = "";
         Artist = "";
@@ -27,6 +33,13 @@ public class Mp3File {
         Genre = "";
         Anno = "";
         Duration = 1;
+        LengthBytes = 1;
+        
+        NameBackup = "";
+        ArtistBackup = "";
+        AlbumBackup = "";
+        GenreBackup = "";
+        AnnoBackup = "";
     }
 
     public String getName() {
@@ -91,5 +104,45 @@ public class Mp3File {
 
     public void setLengthBytes(int LengthBytes) {
         this.LengthBytes = LengthBytes;
+    }
+
+    public String getNameBackup() {
+        return NameBackup;
+    }
+
+    public void setNameBackup(String NameBackup) {
+        this.NameBackup = NameBackup;
+    }
+
+    public String getArtistBackup() {
+        return ArtistBackup;
+    }
+
+    public void setArtistBackup(String ArtistBackup) {
+        this.ArtistBackup = ArtistBackup;
+    }
+
+    public String getAlbumBackup() {
+        return AlbumBackup;
+    }
+
+    public void setAlbumBackup(String AlbumBackup) {
+        this.AlbumBackup = AlbumBackup;
+    }
+
+    public String getGenreBackup() {
+        return GenreBackup;
+    }
+
+    public void setGenreBackup(String GenreBackup) {
+        this.GenreBackup = GenreBackup;
+    }
+
+    public String getAnnoBackup() {
+        return AnnoBackup;
+    }
+
+    public void setAnnoBackup(String AnnoBackup) {
+        this.AnnoBackup = AnnoBackup;
     }
 }

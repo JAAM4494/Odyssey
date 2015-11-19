@@ -34,6 +34,9 @@ public class Constants {
     public static String SQLSelectP1 = "select mp3ID,name,artist,album,genre,anno,duration,fileSize from user_";
     public static String SQLSelectP2 = "_Lib order by mp3ID";
     
+    public static String SQLSelectBackupP1 = "select name,artist,album,genre,anno from user_";
+    public static String SQLSelectBackupP2 = "_MetaBackup order by mp3ID";
+    
     public static String SQLUpdateP1 = "update user_";
     public static String SQLUpdateP2 = "_Lib set(name,artist,album,genre,anno) = (?,?,?,?,?) where mp3ID=?";
     

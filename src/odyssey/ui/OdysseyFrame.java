@@ -350,6 +350,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
         popupMenu = new javax.swing.JPopupMenu();
         changeMetaPopUp = new javax.swing.JMenuItem();
+        commentPopUp = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         omniFinderEntry = new javax.swing.JTextField();
         libsLbl = new javax.swing.JLabel();
@@ -376,6 +377,12 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         libListModel = new DefaultListModel();
         musicLibList = new javax.swing.JList();
         auxBtn = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        friendsList = new javax.swing.JList();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
         wallLbl = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -394,6 +401,8 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         jMenu5 = new javax.swing.JMenu();
         shareLibMenu = new javax.swing.JMenuItem();
         addPeopleMenu = new javax.swing.JMenuItem();
+        recommSongsMenu = new javax.swing.JMenuItem();
+        recommPeopleMenu = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
         contentsMenu = new javax.swing.JMenuItem();
         gestureSupMenu = new javax.swing.JMenuItem();
@@ -407,6 +416,9 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
             }
         });
         popupMenu.add(changeMetaPopUp);
+
+        commentPopUp.setText("Comment Song");
+        popupMenu.add(commentPopUp);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -693,6 +705,35 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         jPanel1.add(auxBtn);
         auxBtn.setBounds(390, 20, 120, 29);
 
+        friendsList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane3.setViewportView(friendsList);
+
+        jPanel1.add(jScrollPane3);
+        jScrollPane3.setBounds(870, 530, 220, 110);
+
+        jLabel1.setFont(new java.awt.Font("Ubuntu", 3, 18)); // NOI18N
+        jLabel1.setForeground(java.awt.Color.white);
+        jLabel1.setText("Friends");
+        jPanel1.add(jLabel1);
+        jLabel1.setBounds(870, 510, 80, 20);
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane4.setViewportView(jTextArea1);
+
+        jPanel1.add(jScrollPane4);
+        jScrollPane4.setBounds(870, 170, 220, 320);
+
+        jLabel2.setFont(new java.awt.Font("Ubuntu", 3, 18)); // NOI18N
+        jLabel2.setForeground(java.awt.Color.white);
+        jLabel2.setText("Song Letter");
+        jPanel1.add(jLabel2);
+        jLabel2.setBounds(870, 150, 110, 17);
+
         wallLbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bg1.jpg"))); // NOI18N
         jPanel1.add(wallLbl);
         wallLbl.setBounds(0, 0, 1100, 650);
@@ -780,6 +821,12 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
         addPeopleMenu.setText("Add People");
         jMenu5.add(addPeopleMenu);
+
+        recommSongsMenu.setText("Recommended Songs");
+        jMenu5.add(recommSongsMenu);
+
+        recommPeopleMenu.setText("Recommended People");
+        jMenu5.add(recommPeopleMenu);
 
         jMenuBar1.add(jMenu5);
 
@@ -1127,15 +1174,19 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private javax.swing.JMenuItem changeMetaMenu;
     private javax.swing.JMenuItem changeMetaPopUp;
     private javax.swing.JMenuItem closeOdyMenu;
+    private javax.swing.JMenuItem commentPopUp;
     private javax.swing.JMenuItem contentsMenu;
     private javax.swing.JButton dislikeBtn;
     private javax.swing.JMenuItem downLibMenu;
     private javax.swing.JButton eqBtn;
     private javax.swing.JTable filesTable;
     private javax.swing.JButton findBtn;
+    private javax.swing.JList friendsList;
     private javax.swing.JButton gestureBtn;
     private javax.swing.JMenuItem gestureSupMenu;
     private javax.swing.JMenuItem getMetaMenu;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
@@ -1146,9 +1197,12 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel libsLbl;
     private javax.swing.JButton likeBtn;
     private javax.swing.JList musicLibList;
@@ -1161,6 +1215,8 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private javax.swing.JButton previousBtn;
     private javax.swing.JSlider progresSlider;
     private javax.swing.JLabel progressLbl;
+    private javax.swing.JMenuItem recommPeopleMenu;
+    private javax.swing.JMenuItem recommSongsMenu;
     private javax.swing.JMenuItem setupDisGesMenu;
     private javax.swing.JMenuItem setupLiGesMenu;
     private javax.swing.JMenuItem shareLibMenu;

@@ -47,16 +47,25 @@ public class LibrariesComm {
 
     public LibrariesComm() {
     }
-    
-    public void createUserTables() {
+
+    public void restoreMetaData(Mp3File pFileToUpdate) {
         getConnection();
         PreparedStatement myStmt = null;
-        
-        String sql = Constants.SQLCreateUserTableP1 + Constants.userID + Constants.SQLCreateUserTableP2;
-        
+
+        // Los datos se obtienen del Mp3File
+        String sql = Constants.SQLUpdateP1 + Constants.userID + Constants.SQLUpdateP2;
+
         try {
             myStmt = connection.prepareStatement(sql);
-            
+
+            myStmt.setString(1, pFileToUpdate.getNameBackup());
+            myStmt.setString(2, pFileToUpdate.getArtistBackup());
+            myStmt.setString(3, pFileToUpdate.getAlbumBackup());
+            myStmt.setString(4, pFileToUpdate.getGenreBackup());
+            myStmt.setString(5, pFileToUpdate.getAnnoBackup());
+
+            myStmt.setString(6, pFileToUpdate.getID());
+
             myStmt.executeUpdate();
             connection.commit();
 
@@ -64,24 +73,49 @@ public class LibrariesComm {
         } catch (SQLException ex) {
             Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
+        closeConnection(connection, myStmt);
+
+        // se setea que hay disponible actualizacion
+        this.setLocalLibStatus("1", 0);
+        this.setLocalLibStatus("1", 1);
+    }
+
+    public void createUserTables() {
+        getConnection();
+        PreparedStatement myStmt = null;
+
+        String sql = Constants.SQLCreateUserTableP1 + Constants.userID + Constants.SQLCreateUserTableP2;
+
+        try {
+            myStmt = connection.prepareStatement(sql);
+
+            myStmt.executeUpdate();
+            connection.commit();
+
+            System.out.println("¡Completed successfully!");
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         closeConnection(connection, myStmt);
     }
 
     public void setLocalLibStatus(String pNewStatus, int pOption) {
         getConnection();
         PreparedStatement myStmt = null;
-        
+
         String sql = "";
-        
-        if(pOption == 0) 
+
+        if (pOption == 0) {
             sql = Constants.SQLUpdateLocalLibStatus;
-        else
+        } else {
             sql = Constants.SQLUpdateLocalLibStatusToServer;
+        }
 
         try {
             myStmt = connection.prepareStatement(sql);
-            
+
             myStmt.setString(1, pNewStatus);
             myStmt.setString(2, Constants.userName); //  *********************** DEBE SER Constants.userID
 
@@ -102,13 +136,14 @@ public class LibrariesComm {
         getConnection();
         PreparedStatement myStmt;
         ResultSet myRs = null;
-        
+
         String sql = "";
-        
-        if(pOption == 0) 
+
+        if (pOption == 0) {
             sql = Constants.SQLSelectStatus;
-        else
+        } else {
             sql = Constants.SQLUpdateLocalLibStatusToServer;
+        }
 
         try {
             myStmt = connection.prepareStatement(sql);
@@ -142,6 +177,7 @@ public class LibrariesComm {
 
     public ArrayList getLibraryContent(int pOption, String pUserNameThatShare) {
         ArrayList retList = new ArrayList();
+        ArrayList retListTemp = new ArrayList();
 
         if (pOption == 0) {
             getConnection();
@@ -151,11 +187,21 @@ public class LibrariesComm {
 
             String sql = Constants.SQLSelectP1 + Constants.userID + Constants.SQLSelectP2;
 
+            // Consultar la tabla de Backup
+            //getConnection();
+            PreparedStatement myStmt2;
+            ResultSet myRs2 = null;
+
+            String sql2 = Constants.SQLSelectBackupP1 + Constants.userID + Constants.SQLSelectBackupP2;
+
             try {
                 myStmt = connection.prepareStatement(sql);
                 myRs = myStmt.executeQuery();
 
-                Mp3File tempFile;
+                myStmt2 = connection.prepareStatement(sql2);
+                myRs2 = myStmt2.executeQuery();
+
+                Mp3File tempFile = null;
                 while (myRs.next()) {
                     tempFile = new Mp3File();
                     tempFile.setID(myRs.getString("mp3ID"));
@@ -166,7 +212,21 @@ public class LibrariesComm {
                     tempFile.setAnno(myRs.getString("anno"));
                     tempFile.setDuration(myRs.getInt("duration"));
                     tempFile.setLengthBytes(myRs.getInt("fileSize"));
-                    retList.add(tempFile);
+
+                    retListTemp.add(tempFile);
+                }
+                Mp3File tempFileAux = null;
+                int pos = 0;
+                while (myRs2.next()) {
+                    tempFileAux = (Mp3File) retListTemp.get(pos);
+                    tempFileAux.setNameBackup(myRs2.getString("name"));
+                    tempFileAux.setArtistBackup(myRs2.getString("artist"));
+                    tempFileAux.setAlbumBackup(myRs2.getString("album"));
+                    tempFileAux.setGenreBackup(myRs2.getString("genre"));
+                    tempFileAux.setAnnoBackup(myRs2.getString("anno"));
+
+                    retList.add(tempFileAux);
+                    pos++;
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
@@ -268,10 +328,10 @@ public class LibrariesComm {
         }
 
         closeConnection(connection, myStmt);
-        
+
         // se setea que hay disponible actualizacion
-        this.setLocalLibStatus("1",0);
-        this.setLocalLibStatus("1",1);
+        this.setLocalLibStatus("1", 0);
+        this.setLocalLibStatus("1", 1);
     }
 
     public byte[] getMp3ToPlay(int pMp3ID) {
@@ -403,6 +463,10 @@ public class LibrariesComm {
                 Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        // se setea que hay disponible actualizacion
+        this.setLocalLibStatus("1", 0);
+        this.setLocalLibStatus("1", 1);
+
         closeConnection(connection, myStmt);
     }
 
