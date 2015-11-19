@@ -55,7 +55,7 @@ import odyssey.HttpRequest;
 import odyssey.LibrariesComm;
 import odyssey.Metodos;
 import odyssey.Mp3File;
-import odyssey.SyncThread;
+import odyssey.LocalSyncThread;
 import odyssey.UserDetails;
 
 /**
@@ -76,7 +76,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private PopupMenu popupMiniature;
     private Metodos metodos = new Metodos();
     
-    private SyncThread HiloSincronizacion;
+    private LocalSyncThread HiloSincronizacion;
 
     private int ItemActual, TamanoEnBytes, PrimeroDeAleatorio, Repetir = 0;
 
@@ -96,7 +96,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         usersThatShareMeArray = new ArrayList();
         myTimer = null;
         popupMiniature = new PopupMenu();
-        HiloSincronizacion = new SyncThread("MainSyncThread");
+        HiloSincronizacion = new LocalSyncThread("MainSyncThread");
 
         progresSlider.setEnabled(false);
 

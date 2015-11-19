@@ -22,7 +22,7 @@ public class Constants {
     public static String streamingUrl = "http://lastodyssey.mybluemix.net/stream/";
     public static String shareMyLibUrl = "http://lastodyssey.mybluemix.net/shareLib/";
     
-    public static String userName = "";
+    public static String userName = "1";
     public static String userID = "XXX";
     
     
@@ -39,5 +39,12 @@ public class Constants {
     
     public static String SQLSelectMediaP1 = "select media from user_";
     public static String SQLSelectMediaP2 = "_Lib where mp3ID=?";
+    
+    public static String SQLSelectStatus = "select localUpdateAvaible from localUsers where userID=?";
+    
+    public static String SQLUpdateLocalLibStatus = "update localUsers set localUpdateAvaible=? where userID=?";
+    
+    public static String SQLUpdateLocalLibStatusToServer = "update localUsers set localUpdateAvaibletoServer=? where userID=?";
+    
     
 }

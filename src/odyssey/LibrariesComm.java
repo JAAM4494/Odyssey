@@ -46,15 +46,71 @@ public class LibrariesComm {
     private Connection connection;
 
     public LibrariesComm() {
-
     }
-    
+
+    public void setLocalLibStatus(String pNewStatus, int pOption) {
+        getConnection();
+        PreparedStatement myStmt = null;
+        
+        String sql = "";
+        
+        if(pOption == 0) 
+            sql = Constants.SQLUpdateLocalLibStatus;
+        else
+            sql = Constants.SQLUpdateLocalLibStatusToServer;
+
+        try {
+            myStmt = connection.prepareStatement(sql);
+            
+            myStmt.setString(1, pNewStatus);
+            myStmt.setString(2, Constants.userName); //  *********************** DEBE SER Constants.userID
+
+            myStmt.executeUpdate();
+            connection.commit();
+
+            System.out.println("¡Completed successfully!");
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        closeConnection(connection, myStmt);
+    }
+
+    public boolean getLibrariesStatus() {
+        boolean returnVal = false;
+
+        getConnection();
+        PreparedStatement myStmt;
+        ResultSet myRs = null;
+
+        String sql = Constants.SQLSelectStatus;
+
+        try {
+            myStmt = connection.prepareStatement(sql);
+            myStmt.setString(1, Constants.userName);     //  *********************** DEBE SER Constants.userID
+
+            myRs = myStmt.executeQuery();
+
+            String status = "";
+            while (myRs.next()) {
+                status = myRs.getString("localUpdateAvaible");
+            }
+            if (status.equals("1")) {
+                returnVal = true;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return returnVal;
+    }
+
     public void setShareLib(String pUser) {
         ArrayList tagNames = new ArrayList();
         ArrayList tagValues = new ArrayList();
         tagNames.add("userName");
         tagValues.add(pUser);
-        
+
         HttpRequest request = new HttpRequest();
         request.postRequest(Constants.shareMyLibUrl, tagValues, tagNames);
     }
@@ -97,21 +153,26 @@ public class LibrariesComm {
             try {
                 JSONObject jsonInput = new JSONObject(response);
                 JSONArray mainArray = jsonInput.getJSONArray("data");
-                
+
                 for (int i = 0; i < mainArray.length(); i++) {
                     JSONArray tempArray = mainArray.getJSONArray(i);
                     Mp3File tempFile = new Mp3File();
                     for (int j = 0; j < tempArray.length(); j++) {
-                        if(j == 0)
+                        if (j == 0) {
                             tempFile.setName(tempArray.getString(j));
-                        if(j == 1)
+                        }
+                        if (j == 1) {
                             tempFile.setArtist(tempArray.getString(j));
-                        if(j == 2)
+                        }
+                        if (j == 2) {
                             tempFile.setAlbum(tempArray.getString(j));
-                        if(j == 3)
+                        }
+                        if (j == 3) {
                             tempFile.setGenre(tempArray.getString(j));
-                        if(j == 4)
+                        }
+                        if (j == 4) {
                             tempFile.setAnno(tempArray.getString(j));
+                        }
                     }
                     retList.add(tempFile);
                 }
@@ -182,6 +243,10 @@ public class LibrariesComm {
         }
 
         closeConnection(connection, myStmt);
+        
+        // se setea que hay disponible actualizacion
+        this.setLocalLibStatus("1",0);
+        this.setLocalLibStatus("1",1);
     }
 
     public byte[] getMp3ToPlay(int pMp3ID) {
@@ -235,7 +300,7 @@ public class LibrariesComm {
 
                 ArrayList tagNames = new ArrayList();
                 ArrayList values = new ArrayList();
-                
+
                 tagNames.add("userName");
                 tagNames.add("name");
                 tagNames.add("artist");
@@ -245,7 +310,7 @@ public class LibrariesComm {
                 tagNames.add("media");
                 tagNames.add("duration");
                 tagNames.add("fileSize");
-                
+
                 values.add(Constants.userName);
                 values.add(myRs.getString("name"));
                 values.add(myRs.getString("artist"));
@@ -328,7 +393,7 @@ public class LibrariesComm {
         if (baseFileFormat instanceof TAudioFileFormat) {
             Map properties = ((TAudioFileFormat) baseFileFormat).properties();
             System.out.println(properties.toString());
-            System.out.printf("FileSize: %d\n",pFile.length());
+            System.out.printf("FileSize: %d\n", pFile.length());
             if (properties.containsKey("author")) {
                 metadataList.add(properties.get("author"));
             } else {
@@ -350,12 +415,12 @@ public class LibrariesComm {
                 metadataList.add("Unknow");
             }
             if (properties.containsKey("duration")) {
-                Long tmpDur = (long)properties.get("duration");
-                metadataList.add(  tmpDur.intValue() / 1000000 );
+                Long tmpDur = (long) properties.get("duration");
+                metadataList.add(tmpDur.intValue() / 1000000);
             } else {
                 metadataList.add(1);
             }
-            Long tmpLenght = (long)pFile.length();
+            Long tmpLenght = (long) pFile.length();
             metadataList.add(tmpLenght.intValue());
         }
 

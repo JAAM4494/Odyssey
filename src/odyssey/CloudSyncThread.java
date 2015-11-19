@@ -11,14 +11,14 @@ import java.util.Observable;
  *
  * @author jaam
  */
-public class SyncThread extends Observable implements Runnable {
+public class CloudSyncThread extends Observable implements Runnable {
 
     public Thread newThread;
     private String threadName;
     boolean suspended = false;
     boolean stopThread = false;
 
-    public SyncThread(String pName) {
+    public CloudSyncThread(String pName) {
         threadName = pName;
     }
 
@@ -30,14 +30,20 @@ public class SyncThread extends Observable implements Runnable {
                     break;
                 }
                 /////// Thread action
-                
+
                 //System.out.println("Thread: " + threadName + "running");
                 Thread.sleep(5000);
-                if(Constants.selectedLib.equals("MyOdyssey-Lib")) {
-                     setChanged();
-                     notifyObservers();
+                if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
+                    LibrariesComm communication = new LibrariesComm();
+                    boolean updateAvaible = communication.getLibrariesStatus();
+
+                    if (updateAvaible) {
+                        communication.setLocalLibStatus("0",0);
+                        setChanged();
+                        notifyObservers();
+                    }
                 }
-    
+
                 ////////////////////
                 Thread.sleep(300);
                 synchronized (this) {
@@ -72,7 +78,9 @@ public class SyncThread extends Observable implements Runnable {
     public void stop() {
         stopThread = true;
     }
-
+    
+    
+    /*
     public static void main(String args[]) {
 
         SyncThread R1 = new SyncThread("Hilo1");
@@ -95,7 +103,9 @@ public class SyncThread extends Observable implements Runnable {
          R1.newThread.join();
          } catch (InterruptedException e) {
          System.out.println("Main thread Interrupted");
-         }*/
+         }
     }
+    */
 
 }
+
