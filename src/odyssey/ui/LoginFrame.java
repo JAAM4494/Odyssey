@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import odyssey.Constants;
+import odyssey.CreateUserTablesThread;
 import odyssey.HttpRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,7 +129,13 @@ public class LoginFrame extends javax.swing.JFrame {
                 } else {
                     this.dispose();
                     Constants.userName = userEntry.getText();
+                    Constants.userID = jsonInput.getString("userID");
+                    CreateUserTablesThread thread = new CreateUserTablesThread("TablesThread");
+                    thread.setResultCode(returnCode);
+                    thread.start();
+                    
                     OdysseyFrame ventanaOdyssey = new OdysseyFrame();
+                    
                     ventanaOdyssey.addWindowListener(new java.awt.event.WindowAdapter() {
                         @Override
                         public void windowClosing(java.awt.event.WindowEvent windowEvent) {

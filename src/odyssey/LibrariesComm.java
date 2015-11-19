@@ -47,6 +47,26 @@ public class LibrariesComm {
 
     public LibrariesComm() {
     }
+    
+    public void createUserTables() {
+        getConnection();
+        PreparedStatement myStmt = null;
+        
+        String sql = Constants.SQLCreateUserTableP1 + Constants.userID + Constants.SQLCreateUserTableP2;
+        
+        try {
+            myStmt = connection.prepareStatement(sql);
+            
+            myStmt.executeUpdate();
+            connection.commit();
+
+            System.out.println("¡Completed successfully!");
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        closeConnection(connection, myStmt);
+    }
 
     public void setLocalLibStatus(String pNewStatus, int pOption) {
         getConnection();

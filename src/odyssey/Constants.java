@@ -48,5 +48,32 @@ public class Constants {
     
     public static String SQLUpdateLocalLibStatusToServer = "update localUsers set localUpdateAvaibletoServer=? where userID=?";
     
+    public static String SQLCreateUserTableP1 = 
+            "create table user_";
+    public static String SQLCreateUserTableP2 = 
+            "_Lib(mp3ID int not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1 MINVALUE 1 NO MAXVALUE NO CYCLE NO CACHE ORDER), name varchar(250) not null, artist varchar(100), album varchar(100), genre varchar(100), anno varchar(100), letter blob(500K), media blob(2M), duration int,fileSize int,primary key(mp3ID))";
+ 
+    public static String SQLCreateMetaBackupP1 = 
+            "create table user_";
+    public static String SQLCreateMetaBackupP2 = 
+            "_MetaBackup(mp3ID int not null, name varchar(250) not null, artist varchar(100), album varchar(100), genre varchar(100), anno varchar(100), letter blob(500K), primary key(mp3ID))";
+    
+    public static String SQLCreateTrigger1P1 =
+            "CREATE TRIGGER insertBackupUser_"; 
+    public static String SQLCreateTrigger1P2 = 
+            " AFTER INSERT ON user_"; 
+    public static String SQLCreateTrigger1P3 = 
+            "_Lib REFERENCING NEW AS NEWROW OLD AS OLDROW FOR EACH ROW BEGIN INSERT INTO user_";
+    public static String SQLCreateTrigger1P4 = 
+            "_MetaBackup(mp3ID, name,artist,album,genre,anno,letter) VALUES(NEWROW.mp3ID,NEWROW.name,NEWROW.artist,NEWROW.album,NEWROW.genre,NEWROW.anno,NEWROW.letter); END";
+    
+    public static String SQLCreateTrigger2P1 =
+            "CREATE TRIGGER doBackupUser_"; 
+    public static String SQLCreateTrigger2P2 = 
+            " NO CASCADE BEFORE UPDATE ON user_"; 
+    public static String SQLCreateTrigger2P3 = 
+            "_Lib REFERENCING NEW AS NEWROW OLD AS OLDROW FOR EACH ROW BEGIN UPDATE user_";
+    public static String SQLCreateTrigger2P4 = 
+            "_MetaBackup SET(name,artist,album,genre,anno,letter) = (OLDROW.name,OLDROW.artist,OLDROW.album,OLDROW.genre,OLDROW.anno,OLDROW.letter) WHERE mp3ID=OLDROW.mp3ID; END";
     
 }
