@@ -33,7 +33,7 @@ public class CreateUserTablesThread extends Observable implements Runnable {
             if (ResultCode.equals("1")) {
                 // Verificar si el usuario ya esta en la base local y sino esperar
                 // que el usuario decida descargar la biblioteca
-                System.out.println("Goooddd");
+                System.out.println("Faltaaaaaa....");
             } else {
                 // crear tablas relacionadas al usuario
                 LibrariesComm comm2 = new LibrariesComm();
@@ -63,12 +63,12 @@ public class CreateUserTablesThread extends Observable implements Runnable {
     }
 
     public void suspend() {
-        System.out.println("Pause...");
+        System.out.println("!Create users tables paused!");
         suspended = true;
     }
 
     public synchronized void resume() {
-        System.out.println("Resuming...");
+        System.out.println("!Create users tables resumed!");
         suspended = false;
         notify();
     }

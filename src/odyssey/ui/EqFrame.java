@@ -5,7 +5,6 @@
  */
 package odyssey.ui;
 
-import odyssey.ui.OdysseyFrame;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Window;
@@ -17,7 +16,6 @@ import java.io.ObjectOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;

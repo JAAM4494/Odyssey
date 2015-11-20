@@ -31,7 +31,6 @@ public class UISyncThread extends Observable implements Runnable {
                 }
                 /////// Thread action
 
-                //System.out.println("Thread: " + threadName + "running");
                 Thread.sleep(5000);
                 if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
                     LibrariesComm communication = new LibrariesComm();
@@ -74,12 +73,12 @@ public class UISyncThread extends Observable implements Runnable {
     }
 
     public void suspend() {
-        System.out.println("Pause...");
+        System.out.println("!UISync paused!");
         suspended = true;
     }
 
     public synchronized void resume() {
-        System.out.println("Resuming...");
+        System.out.println("!UISync resumed!");
         suspended = false;
         notify();
     }
@@ -87,32 +86,4 @@ public class UISyncThread extends Observable implements Runnable {
     public void stop() {
         stopThread = true;
     }
-
-    /*
-     public static void main(String args[]) {
-
-     SyncThread R1 = new SyncThread("Hilo1");
-     R1.start();
-
-     try {
-     Thread.sleep(5000);
-     R1.suspend();
-     Thread.sleep(5000);
-     R1.resume();
-     Thread.sleep(5000);
-     R1.stop();
-     } catch (InterruptedException e) {
-     System.out.println("Main thread Interrupted");
-     }
-
-     /*
-     try {
-     System.out.println("Waiting for threads to finish.");
-     R1.newThread.join();
-     } catch (InterruptedException e) {
-     System.out.println("Main thread Interrupted");
-     }
-     }
-     */
-
 }

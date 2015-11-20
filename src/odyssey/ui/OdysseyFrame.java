@@ -161,9 +161,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
             ArrayList filesPath = new ArrayList();
             ArrayList filesName = new ArrayList();
             for (int i = 0; i < selectedFiles.length; i++) {
-                //System.out.println(selectedFiles[i].getAbsolutePath());
                 filesPath.add(selectedFiles[i].getAbsolutePath());
-                //System.out.println(selectedFiles[i].getName().split(".mp3")[0]);
                 filesName.add(selectedFiles[i].getName().split(".mp3")[0]);
             }
 
@@ -181,11 +179,6 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         }
         ventanaMeta.setModal(true);
         ventanaMeta.runVisible();
-    }
-
-    private void syncWithCloud() {
-        LibrariesComm comunication = new LibrariesComm();
-        comunication.syncMp3FilesWithCloud();
     }
 
     private void abrirInfo() {
@@ -877,7 +870,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         try {
             recognitionService = Runtime.getRuntime().exec("./gestureRecognitionService 0");
             recognitionService.waitFor();
-            System.out.println(recognitionService.exitValue());
+            //System.out.println(recognitionService.exitValue());
         } catch (IOException ex) {
             Logger.getLogger(OdysseyFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
@@ -894,7 +887,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         try {
             recognitionService = Runtime.getRuntime().exec("./gestureRecognitionService 1");
             recognitionService.waitFor();
-            System.out.println(recognitionService.exitValue());
+            //System.out.println(recognitionService.exitValue());
         } catch (IOException ex) {
             Logger.getLogger(OdysseyFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
@@ -907,7 +900,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         try {
             recognitionService = Runtime.getRuntime().exec("./gestureRecognitionService 2");
             recognitionService.waitFor();
-            System.out.println(recognitionService.exitValue());
+            //System.out.println(recognitionService.exitValue());
         } catch (IOException ex) {
             Logger.getLogger(OdysseyFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
@@ -925,7 +918,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     }//GEN-LAST:event_addMp3MenuMousePressed
 
     private void syncCloudMenuMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_syncCloudMenuMousePressed
-        syncWithCloud();
+
     }//GEN-LAST:event_syncCloudMenuMousePressed
 
     private void playBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_playBtnMouseClicked
@@ -1055,7 +1048,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
     private void progresSliderMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_progresSliderMouseClicked
         //if(Canciones.size()>0) {
-
+        /*
         int Clic = progresSlider.getMousePosition().x;
         int LargoDeBarra = progresSlider.getSize().width;
         int finalx = (progresSlider.getMaximum() * Clic) / LargoDeBarra;
@@ -1065,7 +1058,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
             progresSlider.setValue(finalx);
             long LlevaEnSegundos = (myPlayer.Duration * progresSlider.getValue()) / TamanoEnBytes;
             progressLbl.setText(metodos.FormatoReloj(LlevaEnSegundos) + "/" + metodos.FormatoReloj(myPlayer.Duration));
-        }
+        }*/
          //}
 
 
@@ -1087,7 +1080,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
                 mp3FilesArray = communication.getLibraryContent(0, Constants.actualUser);
             } else {
                 int selectedIndex = musicLibList.getSelectedIndex();
-                //System.out.println(musicLibList.getSelectedIndex());
+ 
                 Constants.actualUser = ((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName();
                 mp3FilesArray = communication.getLibraryContent(1, Constants.actualUser);
             }
@@ -1104,7 +1097,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
                     if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
                         LibrariesComm communication = new LibrariesComm();
-                        //System.out.println("ID:" + Integer.parseInt(songID));
+                
                         byte[] mp3ByteArray = communication.getMp3ToPlay(Integer.parseInt(songID));
                         InputStream mp3Stream = new ByteArrayInputStream(mp3ByteArray);
 
@@ -1140,7 +1133,6 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
                 }
             } else {
                 selectedFile = "-1";
-                //System.out.println(selectedFile);
             }
         }
     }//GEN-LAST:event_filesTableMouseClicked
@@ -1250,13 +1242,12 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
     @Override
     public void opened(Object o, Map map) {
-        System.out.println("RRRRR");
+
         if (map.containsKey("audio.length.bytes")) {
             TamanoEnBytes = (int) (Double.parseDouble(map.get("audio.length.bytes").toString()) / 1024);
         } else {
             TamanoEnBytes = (int) (myPlayer.lengthInBytes / 1024);
         }
-        System.out.println(Integer.toString(TamanoEnBytes));
 
         progresSlider.setMaximum(TamanoEnBytes);
         progresSlider.setValue(1);
@@ -1282,20 +1273,15 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
     @Override
     public void progress(int i, long l, byte[] bytes, Map map) {
-        System.out.println("playing..");
-        System.out.println(map.toString());
+
         if (!PararBarra) {
-            System.out.println("Entrando...." + Integer.toString(i));
             float progressUpdate = (float) (i * 1.0f / TamanoEnBytes * 1.0f);
             int progressNow = (int) (TamanoEnBytes * progressUpdate) / 1024;
-            System.out.println("ProgressNow: " + Integer.toString(progressNow));
 
             long pp = (long) map.get("mp3.position.microseconds");
             long ppaux = (pp / 1000000);
             float factor = ((float) progresSlider.getMaximum()) / myPlayer.Duration;
             int rpp = (int) (ppaux * factor);
-            System.out.printf("ProgressNow22: %d\n", rpp);
-            //System.out.println("ProgressNow22: " + factor);
 
             progresSlider.setValue(rpp);
             if (CambioEnEcualizador) {
@@ -1343,13 +1329,12 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         if (arg.equals("local")) {
             LibrariesComm communication = new LibrariesComm();
             mp3FilesArray = communication.getLibraryContent(0, "LocalUser");
-            System.out.println("Actualiza local");
+            System.out.println("!Actualiza ui local!");
         } else {
             LibrariesComm communication = new LibrariesComm();
             int selectedIndex = musicLibList.getSelectedIndex();
-            System.out.println(((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName());
             mp3FilesArray = communication.getLibraryContent(1, ((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName());
-            System.out.println("Actualiza Compartida");
+            System.out.println("!Actualiza ui Compartida!");
         }
         fillMusicTable();
     }

@@ -5,11 +5,9 @@
  */
 package odyssey.ui;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import odyssey.Constants;
 import odyssey.CreateUserTablesThread;
@@ -119,7 +117,7 @@ public class LoginFrame extends javax.swing.JFrame {
         if (response.equals("-1")) {
             JOptionPane.showMessageDialog(this, "Service Unavaible", "Bad request", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            System.out.println(response);
+
             try {
                 JSONObject jsonInput = new JSONObject(response);
                 String returnCode = jsonInput.getString("result");
@@ -145,7 +143,7 @@ public class LoginFrame extends javax.swing.JFrame {
                             values.add(Constants.userName);
 
                             HttpRequest request = new HttpRequest();
-                            String rr = request.postRequest(Constants.logoutUrl, values, tagNames);
+                            request.postRequest(Constants.logoutUrl, values, tagNames);
 
                             System.exit(0);
                         }

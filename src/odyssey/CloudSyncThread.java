@@ -68,11 +68,11 @@ public class CloudSyncThread extends Observable implements Runnable {
 
             if (localIDs.size() == cloudIDs.size()) {
                 this.uploadAllFiles(communication.getAllFilesResultSet());
-                System.out.println("Actualizacion contra cloud hecha");
+                System.out.println("!Actualizacion contra cloud hecha!");
             }
             if (localIDs.size() > cloudIDs.size()) {
                 this.uploadFiles(communication.getAllInFilesResultSet(), cloudIDs);
-                System.out.println("Actualizacion contra cloud hecha");
+                System.out.println("!Actualizacion contra cloud hecha!");
             }
         }
         ///////////////////////////
@@ -112,13 +112,10 @@ public class CloudSyncThread extends Observable implements Runnable {
                 values.add(pRs.getString("genre"));
                 values.add(pRs.getString("anno"));
                 
-                System.out.println("ID:: " + Integer.toString(pRs.getInt("mp3ID")));
                 if(pCloudIDs.contains(pRs.getInt("mp3ID"))) {
                     tagNames.add("operation");
                     values.add("update");
-                    System.out.println("YA EXISTE");
                 } else {
-                    System.out.println("NUEVA");
                     tagNames.add("operation");
                     tagNames.add("media");
                     tagNames.add("fileSize");
@@ -135,8 +132,7 @@ public class CloudSyncThread extends Observable implements Runnable {
                 }
                 
                 HttpRequest request = new HttpRequest();
-                String rr = request.postRequest(Constants.uploadUrl, values, tagNames);
-                System.out.println(rr);
+                request.postRequest(Constants.uploadUrl, values, tagNames);
                 
                 Thread.sleep(300);
                 synchronized (this) {
@@ -197,8 +193,7 @@ public class CloudSyncThread extends Observable implements Runnable {
                 values.add("update");
 
                 HttpRequest request = new HttpRequest();
-                String rr = request.postRequest(Constants.uploadUrl, values, tagNames);
-                System.out.println(rr);
+                request.postRequest(Constants.uploadUrl, values, tagNames);
                 
                 Thread.sleep(300);
                 synchronized (this) {
@@ -225,12 +220,12 @@ public class CloudSyncThread extends Observable implements Runnable {
     }
 
     public void suspend() {
-        System.out.println("Pause...");
+        System.out.println("!CloudSync Paused!");
         suspended = true;
     }
 
     public synchronized void resume() {
-        System.out.println("Resuming...");
+        System.out.println("!CloudSync Resumed!");
         suspended = false;
         notify();
     }

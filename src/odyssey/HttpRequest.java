@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +40,7 @@ public class HttpRequest {
                     (conn.getInputStream())));
 
             if (conn.getResponseCode() == 400) {
-                System.out.println("Bad Request");
+                System.out.println("!Bad Request!");
             } else {
                 returnValue = br.readLine();
             }

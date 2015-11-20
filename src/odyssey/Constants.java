@@ -102,10 +102,5 @@ public class Constants {
     
     public static String SQLGetLocalLibCountP1 = "select mp3ID from user_";
     public static String SQLGetLocalLibCountP2 = "_Lib order by mp3ID";
-    
-    
-    public static synchronized String getSelectedLib() {
-        return selectedLib;
-    }
-    
+ 
 }
