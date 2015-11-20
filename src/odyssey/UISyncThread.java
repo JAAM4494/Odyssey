@@ -11,14 +11,14 @@ import java.util.Observable;
  *
  * @author jaam
  */
-public class LocalSyncThread extends Observable implements Runnable {
+public class UISyncThread extends Observable implements Runnable {
 
-    public Thread newThread;
+    private Thread newThread;
     private String threadName;
     boolean suspended = false;
     boolean stopThread = false;
-
-    public LocalSyncThread(String pName) {
+    
+    public UISyncThread(String pName) {
         threadName = pName;
     }
 
@@ -35,12 +35,21 @@ public class LocalSyncThread extends Observable implements Runnable {
                 Thread.sleep(5000);
                 if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
                     LibrariesComm communication = new LibrariesComm();
-                    boolean updateAvaible = communication.getLibrariesStatus(0);
+                    boolean updateAvaible = communication.getLibrariesStatus(0, 0,Constants.actualUser);
 
                     if (updateAvaible) {
-                        communication.setLocalLibStatus("0",0);
+                        communication.setLocalLibStatus("0", 0);
                         setChanged();
-                        notifyObservers();
+                        notifyObservers("local");
+                    }
+                } else {
+                    // cuando la biblioteca seleccionada es compartida y no la local
+                    LibrariesComm communication = new LibrariesComm();
+                    boolean updateAvaible = communication.getLibrariesStatus(0, 1,Constants.actualUser);
+
+                    if (updateAvaible) {
+                        setChanged();
+                        notifyObservers("share");
                     }
                 }
 
@@ -78,33 +87,32 @@ public class LocalSyncThread extends Observable implements Runnable {
     public void stop() {
         stopThread = true;
     }
-    
-    
+
     /*
-    public static void main(String args[]) {
+     public static void main(String args[]) {
 
-        SyncThread R1 = new SyncThread("Hilo1");
-        R1.start();
+     SyncThread R1 = new SyncThread("Hilo1");
+     R1.start();
 
-        try {
-            Thread.sleep(5000);
-            R1.suspend();
-            Thread.sleep(5000);
-            R1.resume();
-            Thread.sleep(5000);
-            R1.stop();
-        } catch (InterruptedException e) {
-            System.out.println("Main thread Interrupted");
-        }
+     try {
+     Thread.sleep(5000);
+     R1.suspend();
+     Thread.sleep(5000);
+     R1.resume();
+     Thread.sleep(5000);
+     R1.stop();
+     } catch (InterruptedException e) {
+     System.out.println("Main thread Interrupted");
+     }
 
-        /*
-         try {
-         System.out.println("Waiting for threads to finish.");
-         R1.newThread.join();
-         } catch (InterruptedException e) {
-         System.out.println("Main thread Interrupted");
-         }
-    }
-    */
+     /*
+     try {
+     System.out.println("Waiting for threads to finish.");
+     R1.newThread.join();
+     } catch (InterruptedException e) {
+     System.out.println("Main thread Interrupted");
+     }
+     }
+     */
 
 }

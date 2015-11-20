@@ -31,6 +31,8 @@ public class CreateUserTablesThread extends Observable implements Runnable {
             /////// Thread action
 
             if (ResultCode.equals("1")) {
+                // Verificar si el usuario ya esta en la base local y sino esperar
+                // que el usuario decida descargar la biblioteca
                 System.out.println("Goooddd");
             } else {
                 // crear tablas relacionadas al usuario
@@ -38,7 +40,7 @@ public class CreateUserTablesThread extends Observable implements Runnable {
                 comm2.createUserTables();
             }
 
-                //communication.setLocalLibStatus("0", 0);
+            //communication.setLocalLibStatus("0", 0);
             //setChanged();
             //notifyObservers();
             ////////////////////

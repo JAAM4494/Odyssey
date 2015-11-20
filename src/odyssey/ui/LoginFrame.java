@@ -150,7 +150,7 @@ public class LoginFrame extends javax.swing.JFrame {
                             System.exit(0);
                         }
                     });
-                    ventanaOdyssey.setVisible(true);
+                    ventanaOdyssey.run();
                 }
             } catch (JSONException ex) {
                 Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);

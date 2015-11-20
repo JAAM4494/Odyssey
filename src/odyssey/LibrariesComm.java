@@ -7,15 +7,12 @@ package odyssey;
 
 import com.google.common.io.ByteStreams;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ProtocolException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -29,13 +26,10 @@ import java.util.logging.Logger;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.advanced.AdvancedPlayer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
-import sun.misc.IOUtils;
 
 /**
  *
@@ -46,6 +40,139 @@ public class LibrariesComm {
     private Connection connection;
 
     public LibrariesComm() {
+    }
+
+    public void syncMp3FilesWithCloud() {
+        getConnection();
+
+        Statement myStmt;
+        ResultSet myRs = null;
+        InputStream input = null;
+
+        String sql = Constants.SQLSelectAllP1 + Constants.userID + Constants.SQLSelectAllP2;
+        try {
+            myStmt = connection.createStatement();
+            myRs = myStmt.executeQuery(sql);
+
+            while (myRs.next()) {
+
+                input = myRs.getBinaryStream("media");
+                byte[] bytes = ByteStreams.toByteArray(input);
+                String blobInString = Base64.encode(bytes);
+                //System.out.println(myString);
+                //exportFile(myString, "Prueba.mp3");
+
+                ArrayList tagNames = new ArrayList();
+                ArrayList values = new ArrayList();
+
+                tagNames.add("userName");
+                tagNames.add("name");
+                tagNames.add("artist");
+                tagNames.add("album");
+                tagNames.add("genre");
+                tagNames.add("anno");
+                tagNames.add("media");
+                tagNames.add("duration");
+                tagNames.add("fileSize");
+
+                values.add(Constants.userName);
+                values.add(myRs.getString("name"));
+                values.add(myRs.getString("artist"));
+                values.add(myRs.getString("album"));
+                values.add(myRs.getString("genre"));
+                values.add(myRs.getString("anno"));
+                values.add(blobInString);
+                values.add(myRs.getInt("duration"));
+                values.add(myRs.getInt("fileSize"));
+
+                HttpRequest request = new HttpRequest();
+                String rr = request.postRequest(Constants.uploadUrl, values, tagNames);
+                System.out.println(rr);
+            }
+            System.out.println("\nCompleted successfully!");
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public ResultSet getAllInFilesResultSet() {
+        getConnection();
+
+        Statement myStmt;
+        ResultSet myRs = null;
+
+        String sql = Constants.SQLSelectAllInFileP1 + Constants.userID + Constants.SQLSelectAllInFileP2;
+        try {
+            myStmt = connection.createStatement();
+            myRs = myStmt.executeQuery(sql);
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return myRs;
+    }
+
+    public ResultSet getAllFilesResultSet() {
+        getConnection();
+
+        Statement myStmt;
+        ResultSet myRs = null;
+
+        String sql = Constants.SQLSelectAllP1 + Constants.userID + Constants.SQLSelectAllP2;
+        try {
+            myStmt = connection.createStatement();
+            myRs = myStmt.executeQuery(sql);
+        } catch (SQLException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return myRs;
+    }
+
+    public ArrayList getUsersIDLib(int pOption) {
+        ArrayList retList = new ArrayList();
+
+        if (pOption == 0) {
+            getConnection();
+
+            ResultSet myRs = null;
+            PreparedStatement myStmt = null;
+
+            String sql = Constants.SQLGetLocalLibCountP1 + Constants.userID + Constants.SQLGetLocalLibCountP2;
+
+            try {
+                myStmt = connection.prepareStatement(sql);
+                myRs = myStmt.executeQuery();
+
+                while (myRs.next()) {
+                    retList.add(myRs.getInt("mp3ID"));
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            closeConnection(connection, myStmt);
+        } else {
+            HttpRequest request = new HttpRequest();
+            String result = request.getRequest(Constants.getCloudLibCountUrl + Constants.userName);
+
+            try {
+                JSONObject json = new JSONObject(result);
+                JSONArray tempArray = null;
+
+                if (!json.getString("result").equals("0")) {
+                    tempArray = json.getJSONArray("data");
+                    for (int i = 0; i < tempArray.length(); i++) {
+                        retList.add(tempArray.getInt(i));
+                    }
+                }
+            } catch (JSONException ex) {
+                Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return retList;
     }
 
     public void restoreMetaData(Mp3File pFileToUpdate) {
@@ -85,11 +212,39 @@ public class LibrariesComm {
         getConnection();
         PreparedStatement myStmt = null;
 
-        String sql = Constants.SQLCreateUserTableP1 + Constants.userID + Constants.SQLCreateUserTableP2;
-
+        String sql = "";
         try {
+            // inserta al usuario en la tabla de usuarios local
+            sql = Constants.SQLInsertLocalUser;
             myStmt = connection.prepareStatement(sql);
+            myStmt.setString(1, Constants.userID);
+            myStmt.setString(2, Constants.userName);
+            myStmt.executeUpdate();
+            connection.commit();
 
+            // crea la tabla de biblioteca
+            sql = Constants.SQLCreateUserTableP1 + Constants.userID + Constants.SQLCreateUserTableP2;
+            myStmt = connection.prepareStatement(sql);
+            myStmt.executeUpdate();
+            connection.commit();
+
+            // crea la tabla metadata
+            sql = Constants.SQLCreateMetaBackupP1 + Constants.userID + Constants.SQLCreateMetaBackupP2;
+            myStmt = connection.prepareStatement(sql);
+            myStmt.executeUpdate();
+            connection.commit();
+
+            // crea el trigger doInsert
+            sql = Constants.SQLCreateTrigger1P1 + Constants.userID + Constants.SQLCreateTrigger1P2
+                    + Constants.userID + Constants.SQLCreateTrigger1P3 + Constants.userID + Constants.SQLCreateTrigger1P4;
+            myStmt = connection.prepareStatement(sql);
+            myStmt.executeUpdate();
+            connection.commit();
+
+            // crea el trigger doBackup
+            sql = Constants.SQLCreateTrigger2P1 + Constants.userID + Constants.SQLCreateTrigger2P2
+                    + Constants.userID + Constants.SQLCreateTrigger2P3 + Constants.userID + Constants.SQLCreateTrigger2P4;
+            myStmt = connection.prepareStatement(sql);
             myStmt.executeUpdate();
             connection.commit();
 
@@ -117,7 +272,7 @@ public class LibrariesComm {
             myStmt = connection.prepareStatement(sql);
 
             myStmt.setString(1, pNewStatus);
-            myStmt.setString(2, Constants.userName); //  *********************** DEBE SER Constants.userID
+            myStmt.setString(2, Constants.userID);
 
             myStmt.executeUpdate();
             connection.commit();
@@ -130,49 +285,89 @@ public class LibrariesComm {
         closeConnection(connection, myStmt);
     }
 
-    public boolean getLibrariesStatus(int pOption) {
+    public boolean getLibrariesStatus(int pOption, int pLibrary, String pUserBoss) {
         boolean returnVal = false;
 
-        getConnection();
-        PreparedStatement myStmt;
-        ResultSet myRs = null;
+        if (pLibrary == 0) {
+            getConnection();
+            PreparedStatement myStmt;
+            ResultSet myRs = null;
 
-        String sql = "";
+            String sql = "";
 
-        if (pOption == 0) {
-            sql = Constants.SQLSelectStatus;
+            if (pOption == 0) 
+                sql = Constants.SQLSelectStatus;
+            else 
+                sql = Constants.SQLSelectStatusToServer;
+            
+
+            try {
+                myStmt = connection.prepareStatement(sql);
+                myStmt.setString(1, Constants.userID);     //  *********************** DEBE SER Constants.userID
+
+                myRs = myStmt.executeQuery();
+
+                String status = "";
+                while (myRs.next()) {
+                    if(pOption == 0)
+                        status = myRs.getString("localUpdateAvaible");
+                    else
+                        status = myRs.getString("localUpdateAvaibletoServer");;
+                }
+                if (status.equals("1")) {
+                    returnVal = true;
+                }
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
-            sql = Constants.SQLUpdateLocalLibStatusToServer;
-        }
+            HttpRequest request = new HttpRequest();
+            String result = "";
 
-        try {
-            myStmt = connection.prepareStatement(sql);
-            myStmt.setString(1, Constants.userName);     //  *********************** DEBE SER Constants.userID
-
-            myRs = myStmt.executeQuery();
-
-            String status = "";
-            while (myRs.next()) {
-                status = myRs.getString("localUpdateAvaible");
+            if (pOption == 0) {
+                result = request.getRequest(Constants.getShareLibStatusUrl + pUserBoss + "/" + Constants.userName);
+            } else {
+                result = request.getRequest(Constants.getMyLibStatusUrl + Constants.userName);
             }
-            if (status.equals("1")) {
-                returnVal = true;
+
+            try {
+                JSONObject json = new JSONObject(result);
+                String libStatus = json.getString("result");
+
+                if (libStatus.equals("1")) {
+                    returnVal = true;
+                }
+
+            } catch (JSONException ex) {
+                Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return returnVal;
     }
 
-    public void setShareLib(String pUser) {
+    public String setShareLib(String pUser) {
         ArrayList tagNames = new ArrayList();
         ArrayList tagValues = new ArrayList();
+        tagNames.add("userId");
         tagNames.add("userName");
+        tagNames.add("usertoShare");
+        tagValues.add(Constants.userID);
+        tagValues.add(Constants.userName);
         tagValues.add(pUser);
 
         HttpRequest request = new HttpRequest();
-        request.postRequest(Constants.shareMyLibUrl, tagValues, tagNames);
+        String result = request.postRequest(Constants.shareMyLibUrl, tagValues, tagNames);
+
+        String retValue = "";
+        try {
+            JSONObject json = new JSONObject(result);
+            retValue = json.getString("result");
+        } catch (JSONException ex) {
+            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return retValue;
     }
 
     public ArrayList getLibraryContent(int pOption, String pUserNameThatShare) {
@@ -244,19 +439,28 @@ public class LibrariesComm {
                     Mp3File tempFile = new Mp3File();
                     for (int j = 0; j < tempArray.length(); j++) {
                         if (j == 0) {
-                            tempFile.setName(tempArray.getString(j));
+                            tempFile.setID(tempArray.getString(j));
                         }
                         if (j == 1) {
-                            tempFile.setArtist(tempArray.getString(j));
+                            tempFile.setName(tempArray.getString(j));
                         }
                         if (j == 2) {
-                            tempFile.setAlbum(tempArray.getString(j));
+                            tempFile.setArtist(tempArray.getString(j));
                         }
                         if (j == 3) {
-                            tempFile.setGenre(tempArray.getString(j));
+                            tempFile.setAlbum(tempArray.getString(j));
                         }
                         if (j == 4) {
+                            tempFile.setGenre(tempArray.getString(j));
+                        }
+                        if (j == 5) {
                             tempFile.setAnno(tempArray.getString(j));
+                        }
+                        if (j == 6) {
+                            tempFile.setDuration(tempArray.getInt(j));
+                        }
+                        if (j == 7) {
+                            tempFile.setLengthBytes(tempArray.getInt(j));
                         }
                     }
                     retList.add(tempFile);
@@ -302,36 +506,58 @@ public class LibrariesComm {
         return retList;
     }
 
-    public void updateMp3File(Mp3File pFileToUpdate) {
-        getConnection();
-        PreparedStatement myStmt = null;
+    public void updateMp3File(Mp3File pFileToUpdate, int pOption, String pUserToModify) {
 
-        String sql = Constants.SQLUpdateP1 + Constants.userID + Constants.SQLUpdateP2;
+        if (pOption == 0) {
+            getConnection();
+            PreparedStatement myStmt = null;
 
-        try {
-            myStmt = connection.prepareStatement(sql);
+            String sql = Constants.SQLUpdateP1 + Constants.userID + Constants.SQLUpdateP2;
 
-            myStmt.setString(1, pFileToUpdate.getName());
-            myStmt.setString(2, pFileToUpdate.getArtist());
-            myStmt.setString(3, pFileToUpdate.getAlbum());
-            myStmt.setString(4, pFileToUpdate.getGenre());
-            myStmt.setString(5, pFileToUpdate.getAnno());
+            try {
+                myStmt = connection.prepareStatement(sql);
 
-            myStmt.setString(6, pFileToUpdate.getID());
+                myStmt.setString(1, pFileToUpdate.getName());
+                myStmt.setString(2, pFileToUpdate.getArtist());
+                myStmt.setString(3, pFileToUpdate.getAlbum());
+                myStmt.setString(4, pFileToUpdate.getGenre());
+                myStmt.setString(5, pFileToUpdate.getAnno());
 
-            myStmt.executeUpdate();
-            connection.commit();
+                myStmt.setString(6, pFileToUpdate.getID());
 
-            System.out.println("¡Completed successfully!");
-        } catch (SQLException ex) {
-            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+                myStmt.executeUpdate();
+                connection.commit();
+
+                System.out.println("¡Completed successfully!");
+            } catch (SQLException ex) {
+                Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            closeConnection(connection, myStmt);
+
+            // se setea que hay disponible actualizacion
+            this.setLocalLibStatus("1", 0);
+            this.setLocalLibStatus("1", 1);
+        } else {
+            // actualizar una biblioteca compartida
+            ArrayList tagNames = new ArrayList();
+            ArrayList tagValues = new ArrayList();
+
+            tagNames.add("name");
+            tagNames.add("artist");
+            tagNames.add("album");
+            tagNames.add("genre");
+            tagNames.add("anno");
+
+            tagValues.add(pFileToUpdate.getName());
+            tagValues.add(pFileToUpdate.getArtist());
+            tagValues.add(pFileToUpdate.getAlbum());
+            tagValues.add(pFileToUpdate.getGenre());
+            tagValues.add(pFileToUpdate.getAnno());
+
+            HttpRequest request = new HttpRequest();
+            request.postRequest(Constants.modifMetaUrl + pUserToModify + "/" + pFileToUpdate.getID(), tagValues, tagNames);
         }
-
-        closeConnection(connection, myStmt);
-
-        // se setea que hay disponible actualizacion
-        this.setLocalLibStatus("1", 0);
-        this.setLocalLibStatus("1", 1);
     }
 
     public byte[] getMp3ToPlay(int pMp3ID) {
@@ -361,61 +587,6 @@ public class LibrariesComm {
         System.out.println("\nCompleted successfully!");
 
         return bytes;
-    }
-
-    public void syncMp3FilesWithCloud() {
-        getConnection();
-
-        Statement myStmt;
-        ResultSet myRs = null;
-        InputStream input = null;
-
-        String sql = "select * from mp3Files"; // ******************** falta cambiar
-        try {
-            myStmt = connection.createStatement();
-            myRs = myStmt.executeQuery(sql);
-
-            while (myRs.next()) {
-
-                input = myRs.getBinaryStream("media");
-                byte[] bytes = ByteStreams.toByteArray(input);
-                String blobInString = Base64.encode(bytes);
-                //System.out.println(myString);
-                //exportFile(myString, "Prueba.mp3");
-
-                ArrayList tagNames = new ArrayList();
-                ArrayList values = new ArrayList();
-
-                tagNames.add("userName");
-                tagNames.add("name");
-                tagNames.add("artist");
-                tagNames.add("album");
-                tagNames.add("genre");
-                tagNames.add("anno");
-                tagNames.add("media");
-                tagNames.add("duration");
-                tagNames.add("fileSize");
-
-                values.add(Constants.userName);
-                values.add(myRs.getString("name"));
-                values.add(myRs.getString("artist"));
-                values.add(myRs.getString("album"));
-                values.add(myRs.getString("genre"));
-                values.add(myRs.getString("anno"));
-                values.add(blobInString);
-                values.add(myRs.getInt("duration"));
-                values.add(myRs.getInt("fileSize"));
-
-                HttpRequest request = new HttpRequest();
-                String rr = request.postRequest(Constants.uploadUrl, values, tagNames);
-                System.out.println(rr);
-            }
-            System.out.println("\nCompleted successfully!");
-        } catch (SQLException ex) {
-            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(LibrariesComm.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     //Convert a Base64 string and create a file

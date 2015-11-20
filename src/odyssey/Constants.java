@@ -13,14 +13,27 @@ package odyssey;
 public class Constants {
     
     public static String selectedLib = "MyOdyssey-Lib";
+    public static String actualUser = "LocalUser";
+    
+    public static boolean syncWorking = false;
+    
+    public static String getCloudLibCountUrl = "http://lastodyssey.mybluemix.net/myLibLength/";
+    
+    public static String modifMetaUrl = "http://lastodyssey.mybluemix.net/updateMetadata/";
     
     public static String loginUrl = "http://lastodyssey.mybluemix.net/login";
     public static String logoutUrl = "http://lastodyssey.mybluemix.net/logout";
+    
     public static String uploadUrl = "http://lastodyssey.mybluemix.net/upload";
+    
     public static String shareLibsUrl = "http://lastodyssey.mybluemix.net/sharedlibs/";
     public static String sharedLibContentUrl = "http://lastodyssey.mybluemix.net/metadata/";
+    public static String shareMyLibUrl = "http://lastodyssey.mybluemix.net/shareMyLib";
+    
     public static String streamingUrl = "http://lastodyssey.mybluemix.net/stream/";
-    public static String shareMyLibUrl = "http://lastodyssey.mybluemix.net/shareLib/";
+    
+    public static String getShareLibStatusUrl = "http://lastodyssey.mybluemix.net/shareLibStatus/";
+    public static String getMyLibStatusUrl = "http://lastodyssey.mybluemix.net/myLibStatus/";
     
     public static String userName = "1";
     public static String userID = "XXX";
@@ -28,8 +41,16 @@ public class Constants {
     
     // Sentencias SQL
     
+    public static String SQLInsertLocalUser = "insert into localUsers(userID,userName,localUpdateAvaible,localUpdateAvaibletoServer) values(?,?,'0','0')";
+    
     public static String SQLInsertIntoP1 = "insert into user_";
     public static String SQLInsertIntoP2 = "_Lib(name,artist,album,genre,anno,media,duration,fileSize) values (?,?,?,?,?,?,?,?)";
+    
+    public static String SQLSelectAllP1 = "select mp3ID,name,artist,album,genre,anno from user_";
+    public static String SQLSelectAllP2 = "_Lib order by mp3ID";
+    
+    public static String SQLSelectAllInFileP1 = "select mp3ID,name,artist,album,genre,anno,media,fileSize,Duration from user_";
+    public static String SQLSelectAllInFileP2 = "_Lib order by mp3ID";
     
     public static String SQLSelectP1 = "select mp3ID,name,artist,album,genre,anno,duration,fileSize from user_";
     public static String SQLSelectP2 = "_Lib order by mp3ID";
@@ -78,5 +99,13 @@ public class Constants {
             "_Lib REFERENCING NEW AS NEWROW OLD AS OLDROW FOR EACH ROW BEGIN UPDATE user_";
     public static String SQLCreateTrigger2P4 = 
             "_MetaBackup SET(name,artist,album,genre,anno,letter) = (OLDROW.name,OLDROW.artist,OLDROW.album,OLDROW.genre,OLDROW.anno,OLDROW.letter) WHERE mp3ID=OLDROW.mp3ID; END";
+    
+    public static String SQLGetLocalLibCountP1 = "select mp3ID from user_";
+    public static String SQLGetLocalLibCountP2 = "_Lib order by mp3ID";
+    
+    
+    public static synchronized String getSelectedLib() {
+        return selectedLib;
+    }
     
 }

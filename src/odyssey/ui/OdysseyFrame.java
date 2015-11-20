@@ -5,8 +5,6 @@
  */
 package odyssey.ui;
 
-import com.google.common.io.ByteStreams;
-import com.sun.javafx.font.freetype.HBGlyphLayout;
 import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +20,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -33,36 +30,29 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
 import javazoom.jlgui.basicplayer.BasicController;
 import javazoom.jlgui.basicplayer.BasicPlayerEvent;
 import javazoom.jlgui.basicplayer.BasicPlayerListener;
+import odyssey.CloudSyncThread;
 import odyssey.Constants;
 import odyssey.CustomPlayer;
-import odyssey.HttpRequest;
 import odyssey.LibrariesComm;
 import odyssey.Metodos;
 import odyssey.Mp3File;
-import odyssey.LocalSyncThread;
+import odyssey.UISyncThread;
 import odyssey.UserDetails;
 
 /**
  *
  * @author jaam
  */
-public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionListener,Observer, Runnable {
+public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionListener, Observer, Runnable {
 
     private boolean PararBarra = false, Aleatorio = false, EnSilencio = false, Mostrar = false;
     public static boolean CambioEnEcualizador = false;
@@ -75,8 +65,9 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private String selectedFile;
     private PopupMenu popupMiniature;
     private Metodos metodos = new Metodos();
-    
-    private LocalSyncThread HiloSincronizacion;
+
+    private UISyncThread HiloSincronizacionUI;
+    private CloudSyncThread HiloSincronizacionNube;
 
     private int ItemActual, TamanoEnBytes, PrimeroDeAleatorio, Repetir = 0;
 
@@ -96,18 +87,23 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         usersThatShareMeArray = new ArrayList();
         myTimer = null;
         popupMiniature = new PopupMenu();
-        HiloSincronizacion = new LocalSyncThread("MainSyncThread");
+        HiloSincronizacionUI = new UISyncThread("MainSyncThread");
+        HiloSincronizacionNube = new CloudSyncThread("CloudSyncThread");
 
         progresSlider.setEnabled(false);
 
         myPlayer.player.addBasicPlayerListener(this);
         abrirInfo();
-        
+
         initLibraries();
-        HiloSincronizacion.start();
-        HiloSincronizacion.addObserver(this);
+        
+        HiloSincronizacionUI.start();
+        HiloSincronizacionUI.addObserver(this);
+        
+        HiloSincronizacionNube.start();
+        HiloSincronizacionNube.addObserver(this);
     }
-    
+
     private void initLibraries() {
         LibrariesComm communication = new LibrariesComm();
         usersThatShareMeArray = communication.getSharedLibs();
@@ -179,7 +175,9 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private void changeMetadataFile() {
         MetadataFrame ventanaMeta = new MetadataFrame();
         if (!mp3FilesArray.isEmpty()) {
-            ventanaMeta.setFileToUpdate((Mp3File) mp3FilesArray.get(Integer.parseInt(selectedFile) - 1));
+            int selectedIndex = musicLibList.getSelectedIndex();
+            ventanaMeta.setFileToUpdate((Mp3File) mp3FilesArray.get(Integer.parseInt(selectedFile) - 1),
+                    Constants.actualUser);
         }
         ventanaMeta.setModal(true);
         ventanaMeta.runVisible();
@@ -383,6 +381,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         jScrollPane4 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         jLabel2 = new javax.swing.JLabel();
+        aux2Btn = new javax.swing.JButton();
         wallLbl = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -734,6 +733,15 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
         jPanel1.add(jLabel2);
         jLabel2.setBounds(870, 150, 110, 17);
 
+        aux2Btn.setText("Aux");
+        aux2Btn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aux2BtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(aux2Btn);
+        aux2Btn.setBounds(300, 20, 38, 29);
+
         wallLbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bg1.jpg"))); // NOI18N
         jPanel1.add(wallLbl);
         wallLbl.setBounds(0, 0, 1100, 650);
@@ -1075,11 +1083,13 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
             Constants.selectedLib = (String) musicLibList.getSelectedValue();
             clearFilesTable();
             if (Constants.selectedLib.equals("MyOdyssey-Lib")) {
-                mp3FilesArray = communication.getLibraryContent(0, "LocalUser");
+                Constants.actualUser = "LocalUser";
+                mp3FilesArray = communication.getLibraryContent(0, Constants.actualUser);
             } else {
                 int selectedIndex = musicLibList.getSelectedIndex();
                 //System.out.println(musicLibList.getSelectedIndex());
-                mp3FilesArray = communication.getLibraryContent(1, ((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName());
+                Constants.actualUser = ((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName();
+                mp3FilesArray = communication.getLibraryContent(1, Constants.actualUser);
             }
             fillMusicTable();
         }
@@ -1106,17 +1116,19 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
                     } else {
                         URL url;
                         try {
-                            String tmpURL = Constants.streamingUrl + 
-                                    ( (UserDetails)usersThatShareMeArray.get(musicLibList.getSelectedIndex()) ).getUserID() + 
-                                    "/" + selectedFile;
+                            String tmpURL = Constants.streamingUrl
+                                    + ((UserDetails) usersThatShareMeArray.get(musicLibList.getSelectedIndex() - 1)).getUserID()
+                                    + "/" + selectedFile;
                             url = new URL(tmpURL);
-                            
+
                             URLConnection conn = url.openConnection();
                             InputStream is = conn.getInputStream();
                             BufferedInputStream bis = new BufferedInputStream(is);
                             //myPlayer.open2000(url);
                             if (myPlayer.getStatus() != 0) {
-                                myPlayer.changeSongBy(bis, (Mp3File) mp3FilesArray.get(0), false);
+                                myPlayer.changeSongBy(bis, (Mp3File) mp3FilesArray.get(Integer.parseInt(songID) - 1), false);
+                            } else {
+                                myPlayer.changeSongBy(bis, (Mp3File) mp3FilesArray.get(Integer.parseInt(songID) - 1), true);
                             }
 
                         } catch (MalformedURLException ex) {
@@ -1135,6 +1147,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
     private void auxBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_auxBtnActionPerformed
         //myPlayer.Abrir("/home/jaam/Música/Musica/Reggae/RedemptionSong.mp3");
+        HiloSincronizacionNube.suspend();
     }//GEN-LAST:event_auxBtnActionPerformed
 
     private void changeMetaMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeMetaMenuActionPerformed
@@ -1160,9 +1173,16 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
         if (tmpUser != null) {
             LibrariesComm communication = new LibrariesComm();
-            communication.setShareLib(tmpUser);
+            if (!communication.setShareLib(tmpUser).equals("1")) {
+                JOptionPane.showMessageDialog(this, "Bad request", "User doesn't exist", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_shareLibMenuActionPerformed
+
+    private void aux2BtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aux2BtnActionPerformed
+        // TODO add your handling code here:
+        HiloSincronizacionNube.resume();
+    }//GEN-LAST:event_aux2BtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutOdyMenu;
@@ -1170,6 +1190,7 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
     private javax.swing.JMenuItem addPeopleMenu;
     private javax.swing.JLabel animationLbl1;
     private javax.swing.JLabel animationLbl2;
+    private javax.swing.JButton aux2Btn;
     private javax.swing.JButton auxBtn;
     private javax.swing.JMenuItem changeMetaMenu;
     private javax.swing.JMenuItem changeMetaPopUp;
@@ -1319,8 +1340,17 @@ public class OdysseyFrame extends JFrame implements BasicPlayerListener, ActionL
 
     @Override
     public void update(Observable o, Object arg) {
-        LibrariesComm communication = new LibrariesComm();
-        mp3FilesArray = communication.getLibraryContent(0, "LocalUser");
+        if (arg.equals("local")) {
+            LibrariesComm communication = new LibrariesComm();
+            mp3FilesArray = communication.getLibraryContent(0, "LocalUser");
+            System.out.println("Actualiza local");
+        } else {
+            LibrariesComm communication = new LibrariesComm();
+            int selectedIndex = musicLibList.getSelectedIndex();
+            System.out.println(((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName());
+            mp3FilesArray = communication.getLibraryContent(1, ((UserDetails) usersThatShareMeArray.get(selectedIndex - 1)).getUserName());
+            System.out.println("Actualiza Compartida");
+        }
         fillMusicTable();
     }
 

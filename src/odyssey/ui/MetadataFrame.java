@@ -6,6 +6,7 @@
 package odyssey.ui;
 
 import javax.swing.JDialog;
+import odyssey.Constants;
 import odyssey.LibrariesComm;
 import odyssey.Mp3File;
 
@@ -16,6 +17,7 @@ import odyssey.Mp3File;
 public class MetadataFrame extends JDialog {
     
     private Mp3File fileToUpdate;
+    private String userToModify;
 
     /**
      * Creates new form metadataFrame
@@ -28,8 +30,9 @@ public class MetadataFrame extends JDialog {
         fileToUpdate = new Mp3File();
     }
     
-    public void setFileToUpdate(Mp3File pMp3File) {
+    public void setFileToUpdate(Mp3File pMp3File,String pUser) {
         fileToUpdate = pMp3File;
+        userToModify = pUser;
     }
     
     public void runVisible() {
@@ -63,7 +66,10 @@ public class MetadataFrame extends JDialog {
             fileToUpdate.setAnno(newYearTV.getText());
         ///
         LibrariesComm communication = new LibrariesComm();
-        communication.updateMp3File(fileToUpdate);
+        if(Constants.selectedLib.equals("MyOdyssey-Lib"))
+            communication.updateMp3File(fileToUpdate,0,userToModify);
+        else
+            communication.updateMp3File(fileToUpdate,1,userToModify);
     }
     
     private void restoreMetadata() {
